@@ -112,6 +112,25 @@ CREATE TABLE IF NOT EXISTS City (
     ProvinceID INT,
     FOREIGN KEY (ProvinceID) REFERENCES Province(ProvinceID) ON DELETE CASCADE
 );
+
+CREATE TABLE ShoppingCarts (
+    cartID INT PRIMARY KEY AUTO_INCREMENT,
+    userID INT NOT NULL,
+    createdDate DATETIME DEFAULT CURRENT_TIMESTAMP,
+    purchased BOOLEAN DEFAULT FALSE,
+    FOREIGN KEY (userID) REFERENCES Users(UserID) ON DELETE CASCADE
+);
+
+CREATE TABLE CartItems (
+    cartItemID INT PRIMARY KEY AUTO_INCREMENT,
+    cartID INT NOT NULL,
+    gameID INT NOT NULL,
+    quantity INT NOT NULL,
+    priceAtAddition DECIMAL(10, 2),
+    FOREIGN KEY (cartID) REFERENCES ShoppingCarts(cartID) ON DELETE CASCADE,
+    FOREIGN KEY (gameID) REFERENCES Games(GameID) ON DELETE CASCADE
+);
+
 ";
 
 // Execute the SQL to create tables
