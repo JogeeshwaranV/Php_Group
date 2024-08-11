@@ -1,7 +1,8 @@
+
 <?php
 session_start();
 if (isset($_SESSION["user"])) {
-    header("Location: index.php");
+    header("Location: home.php");
     exit();
 }
 
@@ -27,7 +28,7 @@ if (isset($_POST["Login"])) {
     if ($userId) {
         if (password_verify($password, $hashedPassword)) {
             $_SESSION["user"] = $userId; // Store user ID in session
-            header("Location: index.php");
+            header("Location: home.php");
             exit();
         } else {
             echo "<div class='alert alert-danger'>Password does not match</div>";
@@ -51,7 +52,7 @@ if (isset($_POST["Login"])) {
     <style>
         body {
             background-color: #f8f9fa;
-            display: flex;
+          display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
@@ -59,20 +60,25 @@ if (isset($_POST["Login"])) {
             font-family: Arial, sans-serif;
         }
 
-        .container {
-            max-width: 400px;
-            width: 100%;
+        .containerl {
+          /*   max-width: 500px; */
+            width: 600px;
+           /*  width: 100%; */
             padding: 2rem;
+            padding-top: 4rem;
             background-color: #ffffff;
             border-radius: 8px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin: auto;
+            background-color: #343a40;
+            color:#ffcc00 !important;
         }
 
         h2 {
             text-align: center;
             margin-bottom: 1.5rem;
-            color: #343a40;
             font-size: 1.5rem;
+            color:#ffcc00;
         }
 
         .form-group {
@@ -83,7 +89,8 @@ if (isset($_POST["Login"])) {
             display: block;
             margin-bottom: 0.5rem;
             font-weight: 600;
-            color: #495057;
+            
+            color:#ffcc00 !important;
         }
 
         .form-control {
@@ -100,8 +107,8 @@ if (isset($_POST["Login"])) {
             padding: 0.75rem;
             border: none;
             border-radius: 0.5rem;
-            background-color: #007bff;
-            color: #ffffff;
+         
+            background-color:#ffcc00 !important;
             font-size: 1rem;
             cursor: pointer;
             transition: background-color 0.3s, border-color 0.3s;
@@ -109,7 +116,9 @@ if (isset($_POST["Login"])) {
         }
 
         .btn-primary:hover {
-            background-color: #0056b3;
+            background-color:#343a40 !important;
+            color: #ffcc00;
+            border: 1px solid #ffcc00;
         }
 
         .alert {
@@ -131,7 +140,7 @@ if (isset($_POST["Login"])) {
         }
 
         a {
-            color: #007bff;
+            color: white;
             text-decoration: none;
         }
 
@@ -141,7 +150,8 @@ if (isset($_POST["Login"])) {
     </style>
 </head>
 <body>
-    <div class="container">
+
+    <div class="containerl">
         <h2>Login</h2>
         <form action="login.php" method="post">
             <div class="form-group">

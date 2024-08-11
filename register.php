@@ -30,15 +30,16 @@ if (isset($_SESSION["user"])) {
             margin-bottom: 20px;
         }
 
-        .container {
-            max-width: 500px;
-            background-color: #fff;
+        .containerr {
+            width: 600px;
+            margin: auto;
+          
             padding: 50px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             border-radius: 5px;
-            width: 100%;
+            background-color: #343a40;
+            color:#ffcc00 !important;
         }
-
         .form-group {
             margin-bottom: 15px;
         }
@@ -47,7 +48,8 @@ if (isset($_SESSION["user"])) {
             display: block;
             margin-bottom: 0.5rem;
             font-weight: 600;
-            color: #495057;
+              
+            color:#ffcc00 !important;
         }
 
         input[type="text"],
@@ -64,25 +66,31 @@ if (isset($_SESSION["user"])) {
         h2 {
             text-align: center;
             margin-bottom: 1.5rem;
-            color: #343a40;
+          
             font-size: 1.5rem;
+            font-size: 1.5rem;
+            color:#ffcc00;
         }
 
 
         input[type="submit"] {
-            background-color: #28a745;
-            color: white;
-            border: none;
+           
+       
             padding: 10px;
             cursor: pointer;
             border-radius: 4px;
             font-size: 16px;
             width: 100%;
-            transition: background-color 0.3s;
+            background-color: #ffcc00;
+          
+          
         }
 
         input[type="submit"]:hover {
-            background-color: #218838;
+        
+            background-color:#343a40 !important;
+            color: #ffcc00;
+            border: 1px solid #ffcc00;
         }
 
         .alert {
@@ -110,7 +118,7 @@ if (isset($_SESSION["user"])) {
         }
 
         a {
-            color: #007bff;
+            color: white;
             text-decoration: none;
         }
 
@@ -122,7 +130,8 @@ if (isset($_SESSION["user"])) {
 
 <body>
 
-    <div class="container">
+
+    <div class="containerr">
 
         <?php
         if (isset($_POST["Register"])) {

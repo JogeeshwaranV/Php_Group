@@ -1,4 +1,14 @@
-<?php include 'header.php'; ?>
+
+<?php 
+session_start();
+if (!isset($_SESSION["user"])) {
+    header("Location: login.php");
+    exit();
+}
+
+include 'header.php'; ?>
+
+
 
 <!-- Custom CSS Styles -->
 <style>
