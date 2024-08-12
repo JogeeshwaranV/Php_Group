@@ -5,11 +5,18 @@ if (!isset($_SESSION["user"])) {
     exit();
 }
 
-require_once "database.php";
+$servername = "localhost";
+$username = "root";
+$password = "";
+$dbname = "gamestore";
+
+// Create connection
+$conn = new mysqli($servername, $username, $password, $dbname);
 
 $id = intval($_GET['id']);
 
-$sql = "SELECT p.*, c.name AS category_name FROM products p JOIN categories c ON p.category_id = c.id WHERE p.id = ?";
+// Prepare and execute SQL query
+$sql = "SELECT g.*, d.Name AS developer_name FROM Games g JOIN Developers d ON g.DeveloperID = d.DeveloperID WHERE g.GameID = ?";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $id);
 $stmt->execute();
@@ -23,10 +30,11 @@ if (!$product) {
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo htmlspecialchars($product['name']); ?></title>
+    <title><?php echo htmlspecialchars($product['Title']); ?></title>
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -57,7 +65,7 @@ if (!$product) {
 
         .product-details {
             padding: 20px;
-            text-align: left; /* Left-align text and details */
+            text-align: left;
         }
 
         .product-title {
@@ -85,10 +93,10 @@ if (!$product) {
             color: #fff;
             margin-bottom: 20px;
         }
+
         .button-container a {
-                text-decoration: none !important;
-                /* Remove underline from any links */
-            }
+            text-decoration: none !important;
+        }
 
         .product-description,
         .long-description {
@@ -120,9 +128,9 @@ if (!$product) {
 
         .button-container {
             display: flex;
-            justify-content: center; /* Center-align buttons */
-            gap: 10px; /* Space between buttons */
-            margin-top: 20px; /* Space above the buttons */
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
         }
 
         .add-to-cart-button,
@@ -152,33 +160,32 @@ if (!$product) {
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <div class="product-details">
-            <h1 class="product-title"><?php echo htmlspecialchars($product['name']); ?></h1>
-            <p class="product-category">Category: <?php echo htmlspecialchars($product['category_name']); ?></p>
-            <img src="images/<?php echo htmlspecialchars($product['image']); ?>" alt="<?php echo htmlspecialchars($product['name']); ?>">
-            <p class="product-price">$<?php echo htmlspecialchars($product['price']); ?></p>
-            <p class="product-description"><?php echo htmlspecialchars($product['short_description']); ?></p>
-            <p class="long-description"><?php echo htmlspecialchars($product['long_description']); ?></p>
-            
+            <h1 class="product-title"><?php echo htmlspecialchars($product['Title']); ?></h1>
+            <p class="product-category">Developer: <?php echo htmlspecialchars($product['developer_name']); ?></p>
+            <img src="images/<?php echo htmlspecialchars($product['Title']); ?>.jpg" alt="<?php echo htmlspecialchars($product['Title']); ?>">
+            <p class="product-price">$<?php echo htmlspecialchars($product['Price']); ?></p>
+            <p class="product-description"><?php echo htmlspecialchars($product['Description']); ?></p>
+
             <form action="add_to_cart.php" method="POST">
                 <div class="quantity">
                     <label for="quantity">Quantity:</label>
                     <input type="number" id="quantity" name="quantity" value="1" min="1">
                 </div>
-                <input type="hidden" name="product_id" value="<?php echo htmlspecialchars($product['id']); ?>">
-              
+                <input type="hidden" name="product_id" value="<?php echo htmlspecialchars($product['GameID']); ?>">
+
                 <div class="button-container">
-                <button type="submit" class="add-to-cart-button">Add to Cart</button>
-                <a href="products.php" class="back-button">Back to Products</a>
-            </div>
+                    <button type="submit" class="add-to-cart-button">Add to Cart</button>
+                    <a href="products.php" class="back-button">Back to Products</a>
+                </div>
             </form>
-            
-            
         </div>
     </div>
 </body>
+
 </html>
 
 <?php $conn->close(); ?>

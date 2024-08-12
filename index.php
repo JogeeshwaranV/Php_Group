@@ -1,82 +1,82 @@
 <?php
 session_start();
+require_once "dbinit.php";
 if (!isset($_SESSION["user"])) {
     header("Location: login.php");
     exit();
 }
 
-require_once "database.php";
+include 'header.php'; ?>
 
-// Fetch user details from the database
-$userId = $_SESSION["user"]; // User ID from session
 
-$sql = "SELECT fullname FROM users WHERE id = ?"; // Use the correct column name for user ID
-$stmt = mysqli_prepare($conn, $sql);
 
-if (!$stmt) {
-    die("Statement preparation failed: " . mysqli_error($conn));
-}
+<!-- Custom CSS Styles -->
+<style>
+    body {
+        background-color: #f8f9fa;
+        font-family: 'Arial', sans-serif;
+        color: #333;
+    }
 
-mysqli_stmt_bind_param($stmt, "i", $userId);
-mysqli_stmt_execute($stmt);
-mysqli_stmt_bind_result($stmt, $fullname);
-mysqli_stmt_fetch($stmt);
+    .banner {
+        background-image: url('images/banner.jpg');
+        height: 50vh;
+        background-size: cover;
+        background-position: center;
+        position: relative;
+    }
 
-if ($fullname) {
-    $greeting = "Welcome, $fullname!";
-} else {
-    $greeting = "Welcome!";
-}
+    .banner h1 {
+        position: absolute;
+        bottom: 20px;
+        left: 20px;
+        color: white;
+        font-size: 3rem;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+    }
 
-mysqli_stmt_close($stmt);
-mysqli_close($conn);
-?>
+    h2 {
+        font-size: 2rem;
+        margin-bottom: 20px;
+    }
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Next page</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f4;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            text-align: center;
-        }
+    .img-fluid {
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        transition: transform 0.2s;
+        margin-bottom: 20px;
+    }
 
-        h1 {
-            color: #333;
-            margin-bottom: 20px;
-        }
+    .img-fluid:hover {
+        transform: scale(1.05);
+    }
 
-        a {
-            font-size: 16px;
-            color: #007bff;
-            text-decoration: none;
-            padding: 10px 20px;
-            border: 1px solid #007bff;
-            border-radius: 5px;
-            background-color: #fff;
-            transition: background-color 0.3s, color 0.3s, border-color 0.3s;
-        }
+    .container {
+        margin-top: 30px;
+    }
+</style>
 
-        a:hover {
-            background-color: #007bff;
-            color: #fff;
-            border-color: #007bff;
-        }
-    </style>
-</head>
-<body>
-    <h1><?php echo $greeting; ?></h1>
-    <a href="logout.php">Log Out</a>
-</body>
-</html>
+<!-- Banner Image -->
+<div class="container-fluid p-0">
+    <div class="banner">
+        <h1>Welcome to the Game Store</h1>
+    </div>
+</div>
+
+<!-- Trending Games Section -->
+<div class="container mt-4">
+    <h2 class="text-center mb-4">Trending Games</h2>
+    <div class="row">
+        <div class="col-md-4 mb-4">
+            <img src="images/game1.jpg" class="img-fluid" alt="Game 1">
+        </div>
+        <div class="col-md-4 mb-4">
+            <img src="images/game2.png" class="img-fluid" alt="Game 2">
+        </div>
+        <div class="col-md-4 mb-4">
+            <img src="images/game3.avif" class="img-fluid" alt="Game 3">
+        </div>
+    </div>
+</div>
+
+<?php include 'footer.php'; ?>

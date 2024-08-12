@@ -36,7 +36,7 @@
 
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark">
-        <a class="navbar-brand" href="home.php">Game Store</a>
+        <a class="navbar-brand" href="index.php">Game Store</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -48,7 +48,7 @@
                 <li class="nav-item">
                     <a class="nav-link" href="cart.php">Cart</a>
                 </li>
-                
+
                 <li class="nav-item">
                     <a class="nav-link" href="logout.php">Log Out</a>
                 </li>

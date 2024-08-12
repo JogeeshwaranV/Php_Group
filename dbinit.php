@@ -33,7 +33,6 @@ CREATE TABLE IF NOT EXISTS Users (
     RegistrationDate DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
-
 CREATE TABLE IF NOT EXISTS Developers (
     DeveloperID INT PRIMARY KEY AUTO_INCREMENT,
     Name VARCHAR(100) NOT NULL,
@@ -113,7 +112,7 @@ CREATE TABLE IF NOT EXISTS City (
     FOREIGN KEY (ProvinceID) REFERENCES Province(ProvinceID) ON DELETE CASCADE
 );
 
-CREATE TABLE ShoppingCarts (
+CREATE TABLE IF NOT EXISTS ShoppingCarts (
     cartID INT PRIMARY KEY AUTO_INCREMENT,
     userID INT NOT NULL,
     createdDate DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -121,82 +120,94 @@ CREATE TABLE ShoppingCarts (
     FOREIGN KEY (userID) REFERENCES Users(UserID) ON DELETE CASCADE
 );
 
-CREATE TABLE CartItems (
+CREATE TABLE IF NOT EXISTS CartItems (
     cartItemID INT PRIMARY KEY AUTO_INCREMENT,
     cartID INT NOT NULL,
     gameID INT NOT NULL,
     quantity INT NOT NULL,
     priceAtAddition DECIMAL(10, 2),
     FOREIGN KEY (cartID) REFERENCES ShoppingCarts(cartID) ON DELETE CASCADE,
-    FOREIGN KEY (gameID) REFERENCES Games(GameID) ON DELETE CASCADE
+    FOREIGN KEY (gameID) REFERENCES Games(GameID) ON DELETE CASCADE
 );
-
 ";
 
 // Execute the SQL to create tables
 if ($conn->multi_query($sql) === TRUE) {
-    echo "Database and tables created successfully.<br>";
+    echo "Database and tables created successfully.";
+    // Wait for all results to be processed
+    while ($conn->next_result()) {
+        if ($result = $conn->store_result()) {
+            $result->free();
+        }
+    }
 } else {
-    echo "Error creating tables: " . $conn->error;
+    die("Error creating tables: " . $conn->error);
 }
 
 // Sample data insertion
 $sql = "
-INSERT INTO Users (Username, Email, Password, FirstName, LastName) VALUES 
+-- Inserting sample data with error handling for duplicates
+INSERT IGNORE INTO Users (Username, Email, Password, FirstName, LastName) VALUES 
 ('rahul123', 'rahul@example.com', 'password123', 'Rahul', 'Sharma'),
 ('anita456', 'anita@example.com', 'password456', 'Anita', 'Verma'),
 ('ajay789', 'ajay@example.com', 'password789', 'Ajay', 'Kumar');
 
-INSERT INTO Developers (Name, Website) VALUES 
+INSERT IGNORE INTO Developers (Name, Website) VALUES 
 ('GameDev Studios', 'http://gamedevstudios.com'),
 ('Pixel Perfect', 'http://pixelperfect.com');
 
-INSERT INTO Games (Title, Description, Price, ReleaseDate, Stock, DeveloperID) VALUES 
+INSERT IGNORE INTO Games (Title, Description, Price, ReleaseDate, Stock, DeveloperID) VALUES 
 ('Epic Adventure', 'An epic journey through mystical lands.', 29.99, '2023-01-15', 100, 1),
 ('Puzzle Master', 'Challenge your mind with this engaging puzzle game.', 19.99, '2023-03-10', 50, 2);
 
-INSERT INTO Orders (UserID, TotalAmount, Status) VALUES 
+INSERT IGNORE INTO Orders (UserID, TotalAmount, Status) VALUES 
 (1, 49.98, 'Pending'),
 (2, 19.99, 'Shipped');
 
-INSERT INTO OrderItems (OrderID, GameID, Quantity, PriceAtPurchase) VALUES 
+INSERT IGNORE INTO OrderItems (OrderID, GameID, Quantity, PriceAtPurchase) VALUES 
 (1, 1, 1, 29.99),
 (1, 2, 1, 19.99),
 (2, 2, 1, 19.99);
 
-INSERT INTO Genres (Name) VALUES 
+INSERT IGNORE INTO Genres (Name) VALUES 
 ('Action'),
 ('Adventure'),
 ('Puzzle');
 
-INSERT INTO GameGenres (GameID, GenreID) VALUES 
+INSERT IGNORE INTO GameGenres (GameID, GenreID) VALUES 
 (1, 1),
 (1, 2),
 (2, 3);
 
-INSERT INTO Reviews (UserID, GameID, Rating, Comment) VALUES 
+INSERT IGNORE INTO Reviews (UserID, GameID, Rating, Comment) VALUES 
 (1, 1, 5, 'Amazing game! Highly recommend.'),
 (2, 2, 4, 'Very challenging and fun.');
 
-INSERT INTO Country (Name) VALUES 
+INSERT IGNORE INTO Country (Name) VALUES 
 ('India');
 
-INSERT INTO Province (Name, CountryID) VALUES 
+INSERT IGNORE INTO Province (Name, CountryID) VALUES 
 ('Maharashtra', 1),
 ('Karnataka', 1);
 
-INSERT INTO City (Name, ProvinceID) VALUES 
+INSERT IGNORE INTO City (Name, ProvinceID) VALUES 
 ('Mumbai', 1),
 ('Bangalore', 2);
 ";
 
+
 // Execute the sample data insertion
 if ($conn->multi_query($sql) === TRUE) {
     echo "Sample data inserted successfully.";
+    // Wait for all results to be processed
+    while ($conn->next_result()) {
+        if ($result = $conn->store_result()) {
+            $result->free();
+        }
+    }
 } else {
-    echo "Error inserting sample data: " . $conn->error;
+    die("Error inserting sample data: " . $conn->error);
 }
 
 // Close connection
 $conn->close();
-?>

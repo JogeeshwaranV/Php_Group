@@ -1,6 +1,6 @@
 <?php
 session_start();
-
+require_once "dbinit.php";
 // Check if the form was submitted
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $servername = "localhost";
@@ -34,9 +34,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         // Verify the password
         if (password_verify($password, $hashed_password)) {
             $_SESSION['user'] = $userID;
-            
-            // Redirect to home.php
-            header("Location: home.php");
+
+            // Redirect to index.php
+            header("Location: index.php");
             exit();
         } else {
             $error_msg = "Incorrect password.";
@@ -53,6 +53,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -64,6 +65,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             padding: 0;
             background-color: #f4f4f4;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             height: 100vh;
@@ -166,6 +168,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <h2>User Login</h2>
@@ -186,4 +189,5 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <p>Not registered? <a href="register.php">Register Here</a></p>
     </div>
 </body>
+
 </html>
