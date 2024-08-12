@@ -48,9 +48,7 @@
                 <li class="nav-item">
                     <a class="nav-link" href="cart.php">Cart</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="checkout.php">Checkout</a>
-                </li>
+                
                 <li class="nav-item">
                     <a class="nav-link" href="logout.php">Log Out</a>
                 </li>

@@ -1,17 +1,91 @@
 <?php
-session_start();
-if (isset($_SESSION["user"])) {
-    header("Location: login.php");
+// Initialize variables and error messages
+$username_err = $email_err = $password_err = $firstname_err = $lastname_err = "";
+$success_msg = "";
+
+// Check if the form was submitted
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $servername = "localhost";
+    $username_db = "root";
+    $password_db = "";
+    $dbname = "gamestore";
+
+    // Create connection
+    $conn = new mysqli($servername, $username_db, $password_db, $dbname);
+
+    // Check connection
+    if ($conn->connect_error) {
+        die("Connection failed: " . $conn->connect_error);
+    }
+
+    // Retrieve and sanitize input values
+    $username = trim($_POST['username']);
+    $email = trim($_POST['email']);
+    $password = trim($_POST['password']);
+    $firstname = trim($_POST['firstname']);
+    $lastname = trim($_POST['lastname']);
+
+    // Validate inputs
+    $valid = true;
+
+    if (empty($username)) {
+        $username_err = "Username is required.";
+        $valid = false;
+    }
+
+    if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $email_err = "Valid email is required.";
+        $valid = false;
+    }
+
+    if (empty($password)) {
+        $password_err = "Password is required.";
+        $valid = false;
+    }
+
+    if (empty($firstname)) {
+        $firstname_err = "First name is required.";
+        $valid = false;
+    }
+
+    if (empty($lastname)) {
+        $lastname_err = "Last name is required.";
+        $valid = false;
+    }
+
+    // Proceed if all inputs are valid
+    if ($valid) {
+        // Hash the password before storing it
+        $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+
+        // Prepare and bind
+        $stmt = $conn->prepare("INSERT INTO Users (Username, Email, Password, FirstName, LastName) VALUES (?, ?, ?, ?, ?)");
+        $stmt->bind_param("sssss", $username, $email, $hashed_password, $firstname, $lastname);
+
+        // Execute the query
+        if ($stmt->execute()) {
+            // Redirect to login.php after successful registration
+            header("Location: login.php");
+            exit();
+        } else {
+            $error_msg = "Error: " . $stmt->error;
+        }
+
+        // Close statement
+        $stmt->close();
+    }
+
+    // Close connection
+    $conn->close();
 }
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register</title>
+    <title>User Registration</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -24,22 +98,16 @@ if (isset($_SESSION["user"])) {
             height: 100vh;
         }
 
-        h1 {
-            text-align: center;
-            color: #333;
-            margin-bottom: 20px;
-        }
-
-        .containerr {
+        .container {
             width: 600px;
-            margin: auto;
-          
-            padding: 50px;
+            padding: 30px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             border-radius: 5px;
             background-color: #343a40;
-            color:#ffcc00 !important;
+            color: #ffcc00;
+            box-sizing: border-box;
         }
+
         .form-group {
             margin-bottom: 15px;
         }
@@ -48,8 +116,7 @@ if (isset($_SESSION["user"])) {
             display: block;
             margin-bottom: 0.5rem;
             font-weight: 600;
-              
-            color:#ffcc00 !important;
+            color: #ffcc00;
         }
 
         input[type="text"],
@@ -61,34 +128,31 @@ if (isset($_SESSION["user"])) {
             border: 1px solid #ccc;
             border-radius: 4px;
             font-size: 16px;
+            background-color: #fff;
+            color: #000;
         }
 
         h2 {
             text-align: center;
             margin-bottom: 1.5rem;
-          
             font-size: 1.5rem;
-            font-size: 1.5rem;
-            color:#ffcc00;
+            color: #ffcc00;
         }
 
-
         input[type="submit"] {
-           
-       
             padding: 10px;
             cursor: pointer;
             border-radius: 4px;
             font-size: 16px;
             width: 100%;
             background-color: #ffcc00;
-          
-          
+            border: none;
+            color: #343a40;
+            font-weight: bold;
         }
 
         input[type="submit"]:hover {
-        
-            background-color:#343a40 !important;
+            background-color: #343a40;
             color: #ffcc00;
             border: 1px solid #ffcc00;
         }
@@ -98,6 +162,7 @@ if (isset($_SESSION["user"])) {
             padding: 10px;
             border-radius: 4px;
             font-size: 14px;
+            text-align: center;
         }
 
         .alert-danger {
@@ -115,103 +180,60 @@ if (isset($_SESSION["user"])) {
         p {
             text-align: center;
             margin-top: 15px;
+            color: #ffcc00;
         }
 
         a {
             color: white;
             text-decoration: none;
+            font-weight: bold;
         }
 
         a:hover {
             text-decoration: underline;
+            color: #ffcc00;
         }
     </style>
 </head>
-
 <body>
-
-
-    <div class="containerr">
-
-        <?php
-        if (isset($_POST["Register"])) {
-
-            $fullname = $_POST["fullname"];
-            $email = $_POST["email"];
-            $password = $_POST["password"];
-            $passwordRepeat = $_POST["confirm-password"];
-
-            $password_hash = password_hash($password, PASSWORD_DEFAULT);
-            $errors = array();
-
-            if (empty($fullname) || empty($email) || empty($password) || empty($passwordRepeat)) {
-                array_push($errors, "All fields are required to submit");
-            }
-            if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-                array_push($errors, "Email is not valid");
-            }
-            if (strlen($password) < 8) {
-                array_push($errors, "Password must be at least 8 characters long");
-            }
-            if ($password !== $passwordRepeat) {
-                array_push($errors, "Passwords do not match");
-            }
-            require_once "database.php";
-            $sql = "SELECT * FROM users WHERE email = '$email'";
-            $result = mysqli_query($conn, $sql);
-            $rowCount = mysqli_num_rows($result);
-            if ($rowCount > 0) {
-                array_push($errors, "Email already exists");
-            }
-
-            if (count($errors) > 0) {
-                foreach ($errors as $error) {
-                    echo "<div class='alert alert-danger'>$error</div>";
-                }
-            } else {
-                $sql = "INSERT INTO users (fullname, email, password) VALUES (?, ?, ?)";
-                $stmt = mysqli_stmt_init($conn);
-                if (mysqli_stmt_prepare($stmt, $sql)) {
-                    mysqli_stmt_bind_param($stmt, "sss", $fullname, $email, $password_hash);
-                    mysqli_stmt_execute($stmt);
-                    echo "<div class='alert alert-success'>You are registered successfully.</div>";
-                } else {
-                    die("Something went wrong");
-                }
-            }
-        }
-        ?>
-
-        <h2>Register</h2>
-
-        <form action="register.php" method="post">
-
+    <div class="container">
+        <h2>User Registration</h2>
+        <form action="" method="post">
             <div class="form-group">
-                <label for="fullname">Full Name</label>
-                <input type="text" id="fullname" name="fullname">
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username">
+                <?php if (!empty($username_err)) echo '<div class="alert alert-danger">' . $username_err . '</div>'; ?>
             </div>
+
             <div class="form-group">
-                <label for="email">Email</label>
+                <label for="email">Email:</label>
                 <input type="email" id="email" name="email">
+                <?php if (!empty($email_err)) echo '<div class="alert alert-danger">' . $email_err . '</div>'; ?>
             </div>
+
             <div class="form-group">
-                <label for="password">Password</label>
+                <label for="password">Password:</label>
                 <input type="password" id="password" name="password">
+                <?php if (!empty($password_err)) echo '<div class="alert alert-danger">' . $password_err . '</div>'; ?>
             </div>
+
             <div class="form-group">
-                <label for="confirm-password">Re-enter Password</label>
-                <input type="password" id="confirm-password" name="confirm-password">
+                <label for="firstname">First Name:</label>
+                <input type="text" id="firstname" name="firstname">
+                <?php if (!empty($firstname_err)) echo '<div class="alert alert-danger">' . $firstname_err . '</div>'; ?>
             </div>
-            <input type="submit" value="Register" name="Register">
 
+            <div class="form-group">
+                <label for="lastname">Last Name:</label>
+                <input type="text" id="lastname" name="lastname">
+                <?php if (!empty($lastname_err)) echo '<div class="alert alert-danger">' . $lastname_err . '</div>'; ?>
+            </div>
+
+            <input type="submit" value="Register">
+            <?php if (!empty($success_msg)) echo '<div class="alert alert-success">' . $success_msg . '</div>'; ?>
+            <?php if (!empty($error_msg)) echo '<div class="alert alert-danger">' . $error_msg . '</div>'; ?>
         </form>
-
-        <div>
-            <p>Already Registered? <a href="login.php">Login Here</a></p>
-        </div>
-
+        <p>Already Registered? <a href="login.php">Login Here</a></p>
     </div>
-
 </body>
-
 </html>

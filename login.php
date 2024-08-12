@@ -1,170 +1,189 @@
-
 <?php
 session_start();
-if (isset($_SESSION["user"])) {
-    header("Location: home.php");
-    exit();
-}
 
-if (isset($_POST["Login"])) {
-    $email = $_POST["email"];
-    $password = $_POST["password"];
+// Check if the form was submitted
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $servername = "localhost";
+    $username = "root";
+    $password = "";
+    $dbname = "gamestore";
 
-    require_once "database.php";
+    // Create connection
+    $conn = new mysqli($servername, $username, $password, $dbname);
 
-    // Use prepared statements to prevent SQL injection
-    $sql = "SELECT id, fullname, password FROM users WHERE email = ?";
-    $stmt = mysqli_prepare($conn, $sql);
-
-    if (!$stmt) {
-        die("Statement preparation failed: " . mysqli_error($conn));
+    // Check connection
+    if ($conn->connect_error) {
+        die("Connection failed: " . $conn->connect_error);
     }
 
-    mysqli_stmt_bind_param($stmt, "s", $email);
-    mysqli_stmt_execute($stmt);
-    mysqli_stmt_bind_result($stmt, $userId, $fullname, $hashedPassword);
-    mysqli_stmt_fetch($stmt);
+    $email = $_POST['email'];
+    $password = $_POST['password'];
 
-    if ($userId) {
-        if (password_verify($password, $hashedPassword)) {
-            $_SESSION["user"] = $userId; // Store user ID in session
+    // Prepare and bind
+    $stmt = $conn->prepare("SELECT UserID, Password FROM Users WHERE Email = ?");
+    $stmt->bind_param("s", $email);
+
+    // Execute the query
+    $stmt->execute();
+    $stmt->store_result();
+
+    if ($stmt->num_rows > 0) {
+        $stmt->bind_result($userID, $hashed_password);
+        $stmt->fetch();
+
+        // Verify the password
+        if (password_verify($password, $hashed_password)) {
+            $_SESSION['user'] = $userID;
+            
+            // Redirect to home.php
             header("Location: home.php");
             exit();
         } else {
-            echo "<div class='alert alert-danger'>Password does not match</div>";
+            $error_msg = "Incorrect password.";
         }
     } else {
-        echo "<div class='alert alert-danger'>Email does not match</div>";
+        $error_msg = "No account found with that email.";
     }
 
-    mysqli_stmt_close($stmt);
-    mysqli_close($conn);
+    // Close statement and connection
+    $stmt->close();
+    $conn->close();
 }
 ?>
-
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
+    <title>User Login</title>
     <style>
         body {
-            background-color: #f8f9fa;
-          display: flex;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
-            margin: 0;
-            font-family: Arial, sans-serif;
         }
 
-        .containerl {
-          /*   max-width: 500px; */
+        .container {
             width: 600px;
-           /*  width: 100%; */
-            padding: 2rem;
-            padding-top: 4rem;
-            background-color: #ffffff;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            margin: auto;
+            padding: 30px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border-radius: 5px;
             background-color: #343a40;
-            color:#ffcc00 !important;
+            color: #ffcc00;
+            box-sizing: border-box;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #ffcc00;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px;
+            background-color: #fff;
+            color: #000;
         }
 
         h2 {
             text-align: center;
             margin-bottom: 1.5rem;
             font-size: 1.5rem;
-            color:#ffcc00;
+            color: #ffcc00;
         }
 
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-
-        .form-label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 600;
-            
-            color:#ffcc00 !important;
-        }
-
-        .form-control {
-            width: 100%;
-            padding: 0.75rem;
-            border: 1px solid #ced4da;
-            border-radius: 0.5rem;
-            box-sizing: border-box;
-        }
-
-        .btn-primary {
-            display: block;
-            width: 100%;
-            padding: 0.75rem;
-            border: none;
-            border-radius: 0.5rem;
-         
-            background-color:#ffcc00 !important;
-            font-size: 1rem;
+        input[type="submit"] {
+            padding: 10px;
             cursor: pointer;
-            transition: background-color 0.3s, border-color 0.3s;
-            text-align: center;
+            border-radius: 4px;
+            font-size: 16px;
+            width: 100%;
+            background-color: #ffcc00;
+            border: none;
+            color: #343a40;
+            font-weight: bold;
         }
 
-        .btn-primary:hover {
-            background-color:#343a40 !important;
+        input[type="submit"]:hover {
+            background-color: #343a40;
             color: #ffcc00;
             border: 1px solid #ffcc00;
         }
 
         .alert {
-            margin-top: 1rem;
-            padding: 1rem;
-            border: 1px solid transparent;
-            border-radius: 0.5rem;
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 4px;
+            font-size: 14px;
+            text-align: center;
         }
 
         .alert-danger {
             color: #721c24;
             background-color: #f8d7da;
-            border-color: #f5c6cb;
+            border: 1px solid #f5c6cb;
+        }
+
+        .alert-success {
+            color: #155724;
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
         }
 
         p {
             text-align: center;
-            margin-top: 1.5rem;
+            margin-top: 15px;
+            color: #ffcc00;
         }
 
         a {
             color: white;
             text-decoration: none;
+            font-weight: bold;
         }
 
         a:hover {
             text-decoration: underline;
+            color: #ffcc00;
         }
     </style>
 </head>
 <body>
+    <div class="container">
+        <h2>User Login</h2>
+        <form action="" method="post">
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" required>
+            </div>
 
-    <div class="containerl">
-        <h2>Login</h2>
-        <form action="login.php" method="post">
             <div class="form-group">
-                <label for="email" class="form-label">Email address</label>
-                <input type="email" class="form-control" id="email" name="email" required>
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" required>
             </div>
-            <div class="form-group">
-                <label for="password" class="form-label">Password</label>
-                <input type="password" class="form-control" id="password" name="password" required>
-            </div>
-            <button type="submit" name="Login" class="btn-primary">Login</button>
+
+            <input type="submit" value="Login">
+            <?php if (!empty($error_msg)) echo '<div class="alert alert-danger">' . $error_msg . '</div>'; ?>
         </form>
-        <p>Not Registered Yet? <a href="register.php">Register Here</a></p>
+        <p>Not registered? <a href="register.php">Register Here</a></p>
     </div>
 </body>
 </html>
