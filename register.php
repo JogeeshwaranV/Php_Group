@@ -1,5 +1,5 @@
 <?php
-require_once "dbinit.php";
+// require_once "dbinit.php";
 // Initialize variables and error messages
 $username_err = $email_err = $password_err = $firstname_err = $lastname_err = "";
 $success_msg = "";

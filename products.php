@@ -5,14 +5,19 @@ if (!isset($_SESSION["user"])) {
     header("Location: login.php");
     exit();
 }
-// Load database connection
+include 'header.php';
+// Database connection
 $servername = "localhost";
 $username = "root";
 $password = "";
 $dbname = "gamestore";
 
-// Create connection
 $conn = new mysqli($servername, $username, $password, $dbname);
+
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+
 // Initialize filter variables
 $filter_name = '';
 $filter_min_price = '';
@@ -30,31 +35,49 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 // Fetch categories for the filter
 $categories_result = $conn->query("SELECT * FROM Genres");
 
-// Construct SQL query with filters
+// Construct SQL query with filters using prepared statements
 $sql = "SELECT g.*, GROUP_CONCAT(DISTINCT gr.Name) as genre_names FROM Games g
 LEFT JOIN GameGenres gg ON g.GameID = gg.GameID
 LEFT JOIN Genres gr ON gg.GenreID = gr.GenreID
 WHERE 1=1";
 
+$params = [];
+$types = '';
+
 if (!empty($filter_name)) {
-    $sql .= " AND g.Title LIKE '%" . $conn->real_escape_string($filter_name) . "%'";
+    $sql .= " AND g.Title LIKE ?";
+    $params[] = '%' . $filter_name . '%';
+    $types .= 's';
 }
 
 if (!empty($filter_min_price)) {
-    $sql .= " AND g.Price >= " . $conn->real_escape_string($filter_min_price);
+    $sql .= " AND g.Price >= ?";
+    $params[] = $filter_min_price;
+    $types .= 'd';
 }
 
 if (!empty($filter_max_price)) {
-    $sql .= " AND g.Price <= " . $conn->real_escape_string($filter_max_price);
+    $sql .= " AND g.Price <= ?";
+    $params[] = $filter_max_price;
+    $types .= 'd';
 }
 
 if (!empty($filter_category)) {
-    $sql .= " AND gg.GenreID = " . $conn->real_escape_string($filter_category);
+    $sql .= " AND gg.GenreID = ?";
+    $params[] = $filter_category;
+    $types .= 'i';
 }
 
 $sql .= " GROUP BY g.GameID";
 
-$result = $conn->query($sql);
+$stmt = $conn->prepare($sql);
+
+if ($params) {
+    $stmt->bind_param($types, ...$params);
+}
+
+$stmt->execute();
+$result = $stmt->get_result();
 $products_found = $result->num_rows > 0;
 
 ?>
@@ -74,7 +97,7 @@ $products_found = $result->num_rows > 0;
             background-color: #f4f4f4;
         }
 
-        .container {
+        .container-product {
             max-width: 1200px;
             margin: auto;
             padding: 20px;
@@ -209,7 +232,12 @@ $products_found = $result->num_rows > 0;
         }
 
         button {
-            background-color: black;
+            background-color: #ffcc00!important;
+            color: #000 !important;
+        }
+        button:hover {
+            background-color: black !important;
+            color: #fff !important;
         }
 
         .back-button {
@@ -233,20 +261,17 @@ $products_found = $result->num_rows > 0;
     </style>
     <script>
         function clearFilters() {
-            // Clear all filter inputs
             document.querySelector('input[name="name"]').value = '';
             document.querySelector('input[name="min_price"]').value = '';
             document.querySelector('input[name="max_price"]').value = '';
             document.querySelector('select[name="category"]').value = '';
-
-            // Submit the form to refresh the product list without filters
             document.querySelector('.filter-form').submit();
         }
     </script>
 </head>
 
 <body>
-    <div class="container">
+    <div class="container-product">
         <h1>Our Products</h1>
         <form method="POST" class="filter-form">
             <input type="text" name="name" placeholder="Search by name" value="<?php echo htmlspecialchars($filter_name); ?>">
@@ -268,7 +293,7 @@ $products_found = $result->num_rows > 0;
                 <?php while ($row = $result->fetch_assoc()): ?>
                     <div class="product">
                         <a href="product_details.php?id=<?php echo htmlspecialchars($row['GameID']); ?>">
-                            <img src="images/<?php echo htmlspecialchars($row['Title']); ?>.jpg" alt="<?php echo htmlspecialchars($row['Title']); ?>">
+                            <img src="images/<?php echo htmlspecialchars($row['ImageFile']); ?>" alt="<?php echo htmlspecialchars($row['Title']); ?>">
                             <div class="product-details">
                                 <p class="product-title"><?php echo htmlspecialchars($row['Title']); ?></p>
                                 <p class="product-price">$<?php echo htmlspecialchars($row['Price']); ?></p>
@@ -284,8 +309,12 @@ $products_found = $result->num_rows > 0;
         <?php endif; ?>
         <a href="index.php" class="back-button">Back to Home</a>
     </div>
+    <?php include 'footer.php'; ?>
 </body>
 
 </html>
 
-<?php $conn->close(); ?>
+<?php
+$stmt->close();
+$conn->close();
+?>

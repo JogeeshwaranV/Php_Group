@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once "dbinit.php";
+// require_once "dbinit.php";
 if (!isset($_SESSION["user"])) {
     header("Location: login.php");
     exit();
@@ -16,6 +16,9 @@ include 'header.php'; ?>
         background-color: #f8f9fa;
         font-family: 'Arial', sans-serif;
         color: #333;
+        display: flex;
+        height: 100vh;
+        flex-direction: column;
     }
 
     .banner {
@@ -56,27 +59,30 @@ include 'header.php'; ?>
     }
 </style>
 
-<!-- Banner Image -->
-<div class="container-fluid p-0">
-    <div class="banner">
-        <h1>Welcome to the Game Store</h1>
-    </div>
-</div>
+<body>
 
-<!-- Trending Games Section -->
-<div class="container mt-4">
-    <h2 class="text-center mb-4">Trending Games</h2>
-    <div class="row">
-        <div class="col-md-4 mb-4">
-            <img src="images/game1.jpg" class="img-fluid" alt="Game 1">
-        </div>
-        <div class="col-md-4 mb-4">
-            <img src="images/game2.png" class="img-fluid" alt="Game 2">
-        </div>
-        <div class="col-md-4 mb-4">
-            <img src="images/game3.avif" class="img-fluid" alt="Game 3">
+    <!-- Banner Image -->
+    <div class="container-fluid p-0">
+        <div class="banner">
+            <h1>Welcome to the Game Store</h1>
         </div>
     </div>
-</div>
+
+    <!-- Trending Games Section -->
+    <div class="container mt-4">
+        <h2 class="text-center mb-4">Trending Games</h2>
+        <div class="row">
+            <div class="col-md-4 mb-4">
+                <img src="images/game1.jpg" class="img-fluid" alt="Game 1">
+            </div>
+            <div class="col-md-4 mb-4">
+                <img src="images/game2.png" class="img-fluid" alt="Game 2">
+            </div>
+            <div class="col-md-4 mb-4">
+                <img src="images/game3.avif" class="img-fluid" alt="Game 3">
+            </div>
+        </div>
+    </div>
+</body>
 
 <?php include 'footer.php'; ?>
